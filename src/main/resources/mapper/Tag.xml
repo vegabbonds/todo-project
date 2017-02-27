@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nts.intern.todo.dao.TagDao">
+
+	<insert id="insertTag" parameterType="com.nts.intern.todo.model.tag.Tag"
+		useGeneratedKeys="true" keyProperty="tagId">
+		INSERT INTO 
+			tag(tag_name)
+		VALUES(#{tagName})
+	</insert>
+
+	<delete id="deleteTag" parameterType="Map">
+		DELETE 
+			tag, 
+			custom, 
+			todo, 
+			share 
+		FROM 
+			tag tag
+		LEFT JOIN
+			custom_tag custom ON tag.tag_id = custom.tag_id
+		LEFT JOIN
+			todo todo ON tag.tag_id = todo.tag_id
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		WHERE
+			tag.tag_id = #{tagId}
+	</delete>
+
+	<update id="updateTag" parameterType="com.nts.intern.todo.model.tag.Tag">
+		UPDATE 
+			tag
+		SET
+			tag_name=#{tagName}
+		WHERE 
+			tag_id= #{tagId}
+	</update>
+
+	<select id="selectTagListExceptDefaultTag" resultType="com.nts.intern.todo.model.tag.CustomTag">
+		SELECT
+			tag.tag_id,	
+			tag.tag_name, 
+			custom.user_id, 
+			custom.writer
+		FROM 
+			tag tag
+		INNER JOIN
+			custom_tag custom ON tag.tag_id = custom.tag_id
+		WHERE 
+			custom.user_id = #{userId}
+		AND 
+			tag.tag_id != 0
+	</select>
+
+	<select id="selectTagListByWriter" resultType="com.nts.intern.todo.model.tag.CustomTag">
+		SELECT 
+			tag.tag_id,	
+			tag.tag_name, 
+			custom.user_id, 
+			custom.writer
+		FROM 
+			tag tag
+		INNER JOIN
+			custom_tag custom ON tag.tag_id = custom.tag_id
+		WHERE 
+			custom.user_id = #{userId} AND writer = 1
+	</select>
+
+</mapper>

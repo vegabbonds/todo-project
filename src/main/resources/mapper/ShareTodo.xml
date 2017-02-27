@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nts.intern.todo.dao.ShareTodoDao">
+
+	<insert id="insertSharedUser" parameterType="com.nts.intern.todo.model.todo.SharedTodo">
+		INSERT INTO
+			shared_todo(todo_id, writer_id, reader_id)
+		VALUES(#{todoId}, #{writerId}, #{readerId});
+	</insert>
+
+	<delete id="deleteSharedUser" parameterType="Map">
+		DELETE
+		FROM
+			shared_todo
+		WHERE 
+			todo_id = #{todoId}
+		AND
+			reader_id = #{readerId};
+	</delete>
+	
+	<select id="selectSharedUser" parameterType="Map" resultType="com.nts.intern.todo.model.user.User">
+		SELECT
+			share.reader_id as userId, 
+			user_password as userPassword, 
+			user.user_name as userName,
+			user.user_birth as userBirth
+		FROM
+			shared_todo share
+		INNER JOIN
+			user user ON share.reader_id = user.user_id
+		WHERE
+			share.writer_id = #{writerId}
+		AND
+			todo_id = #{todoId};
+	</select>
+
+	<select id="selectSharedTodoListByTagId" resultType="com.nts.intern.todo.model.todo.Todo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.tag_id,
+			todo.complete
+		FROM
+			todo todo
+		INNER JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		WHERE
+			share.reader_id
+			= #{readerId} 
+		AND 
+			todo.tag_id = #{tagId};
+	</select>
+
+</mapper>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nts.intern.todo.dao.TodoDao">
+
+	<insert id="insertTodo" parameterType="com.nts.intern.todo.model.todo.Todo">
+		INSERT INTO 
+			todo(todo_id, todo_name, writer_id, start_date, end_date, tag_id)
+		VALUES(#{todoId}, #{todoName}, #{writerId}, #{startDate}, #{endDate}, #{tagId})
+	</insert>
+
+	<delete id="deleteTodo" parameterType="Map">
+		DELETE 
+			todo, 
+			share 
+		FROM 
+			todo todo
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		WHERE
+			todo.todo_id = #{todoId} 
+		AND 
+			todo.writer_id = #{writerId}
+	</delete>
+
+	<update id="updateTodo" parameterType="com.nts.intern.todo.model.todo.Todo">
+		UPDATE 
+			todo
+		SET
+			todo_name =	#{todoName},
+			start_date = #{startDate},
+			end_date = #{endDate},
+			tag_id = #{tagId},
+			complete = #{complete}
+		WHERE
+			todo_id = #{todoId}
+	</update>
+
+	<select id="selectTagId" resultType="Integer">
+		SELECT 
+			tag_id
+		FROM 
+			todo
+		WHERE
+			todo_id = #{todoId}
+	</select>
+
+	<select id="selectTodo" parameterType="Integer"
+		resultType="com.nts.intern.todo.model.todo.Todo">
+		SELECT
+			todo_id, 
+			todo_name, 
+			writer_id, 
+			start_date, 
+			end_date, 
+			tag_id, 
+			complete
+		FROM
+			todo
+		WHERE
+			todo_id = #{todoId}
+	</select>
+
+	<select id="selectTodoListByTagId" resultType="com.nts.intern.todo.model.todo.Todo">
+		SELECT 
+			todo_id, 
+			todo_name, 
+			writer_id, 
+			start_date, 
+			end_date, 
+			tag_id, 
+			complete
+		FROM 
+			todo
+		WHERE
+			tag_id = #{tagId} and writer_id = #{writerId}
+	</select>
+
+	<select id="selectNotCompleteTodoList" parameterType="String"
+		resultType="com.nts.intern.todo.model.todo.DetailTodo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.complete,
+			share.reader_id
+		FROM
+			todo todo
+		LEFT JOIN 
+			shared_todo share ON todo.todo_id = share.todo_id
+		INNER JOIN
+			tag tag ON todo.tag_id = tag.tag_id
+		WHERE
+			(share.reader_id = #{userId} or
+			todo.writer_id = #{userId}) AND
+			todo.end_date <![CDATA[ < ]]>
+			DATE(NOW())
+		AND 
+			todo.complete=0
+	</select>
+
+	<select id="selectTodayTodoList" parameterType="String"
+		resultType="com.nts.intern.todo.model.todo.DetailTodo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.complete,
+			share.reader_id
+		FROM
+			todo todo
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		INNER JOIN
+			tag tag ON todo.tag_id = tag.tag_id
+		WHERE
+			(share.reader_id = #{userId} or
+			todo.writer_id = #{userId}) AND
+			todo.start_date <![CDATA[ <= ]]>
+			DATE(NOW())
+		AND
+			todo.end_date <![CDATA[ >= ]]> DATE(NOW())
+	</select>
+
+	<select id="selectTodoListWithinAWeek" parameterType="String"
+		resultType="com.nts.intern.todo.model.todo.DetailTodo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.complete,
+			share.reader_id
+		FROM
+			todo todo
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		INNER JOIN
+			tag tag ON todo.tag_id = tag.tag_id
+		WHERE
+			(share.reader_id = #{userId} OR	todo.writer_id = #{userId}) 
+		AND
+			(todo.start_date <![CDATA[ >= ]]>
+			DATE(NOW())
+			AND todo.start_date <![CDATA[ <= ]]>
+			DATE(DATE_ADD(NOW(), INTERVAL 7 DAY)))
+		OR 
+			(todo.end_date <![CDATA[ >= ]]>
+			DATE(NOW())
+			AND todo.end_date <![CDATA[ <= ]]>
+			DATE(DATE_ADD(NOW(), INTERVAL 7 DAY)))
+		OR 
+			(todo.start_date <![CDATA[ <= ]]> 
+			DATE(NOW()) 
+			AND todo.end_date <![CDATA[ >= ]]> 
+			DATE(DATE_ADD(NOW(), INTERVAL 7 DAY)))
+	</select>
+
+	<select id="selectTodoListWithinAMonth" parameterType="String"
+		resultType="com.nts.intern.todo.model.todo.DetailTodo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.complete,
+			share.reader_id
+		FROM
+			todo todo
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		INNER JOIN
+			tag tag ON todo.tag_id = tag.tag_id
+		WHERE
+			(share.reader_id = #{userId} OR	todo.writer_id = #{userId}) 
+		AND
+			(todo.start_date <![CDATA[ >= ]]>
+			DATE(NOW())
+			AND todo.start_date <![CDATA[ <= ]]>
+			DATE(DATE_ADD(NOW(), INTERVAL 1 MONTH)))
+		OR 
+			(todo.end_date <![CDATA[ >= ]]>
+			DATE(NOW())
+			AND todo.end_date <![CDATA[ <= ]]>
+			DATE(DATE_ADD(NOW(), INTERVAL 1 MONTH)))
+		OR 
+			(todo.start_date <![CDATA[ <= ]]>
+			DATE(NOW())
+			AND todo.end_date <![CDATA[ >= ]]>
+			DATE(DATE_ADD(NOW(), INTERVAL 1 MONTH)))
+	</select>
+
+	<select id="selectLaterTodoList" parameterType="String"
+		resultType="com.nts.intern.todo.model.todo.DetailTodo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.complete,
+			share.reader_id
+		FROM
+			todo todo
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		INNER JOIN
+			tag tag ON todo.tag_id = tag.tag_id
+		WHERE
+			(share.reader_id = #{userId} or
+			todo.writer_id = #{userId}) AND
+			todo.start_date <![CDATA[ > ]]>
+			DATE(DATE_ADD(NOW(), INTERVAL 1 MONTH))
+		AND
+			todo.complete = 0;
+	</select>
+
+	<select id="selectCompleteTodoList" parameterType="String"
+		resultType="com.nts.intern.todo.model.todo.DetailTodo">
+		SELECT
+			todo.todo_id,
+			todo.todo_name,
+			todo.writer_id,
+			todo.start_date,
+			todo.end_date,
+			todo.complete,
+			share.reader_id
+		FROM
+			todo todo
+		LEFT JOIN
+			shared_todo share ON todo.todo_id = share.todo_id
+		INNER JOIN
+			tag tag ON todo.tag_id = tag.tag_id
+		WHERE
+			(share.reader_id =
+			#{userId} or
+			todo.writer_id = #{userId}) 
+		AND
+			todo.complete = 1;
+	</select>
+
+</mapper>

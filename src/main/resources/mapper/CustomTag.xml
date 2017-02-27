@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nts.intern.todo.dao.CustomTagDao">
+
+	<insert id="insertCustomTag" parameterType="com.nts.intern.todo.model.tag.CustomTag">
+		INSERT INTO
+			custom_tag(tag_id, user_id, writer)
+		VALUES(#{tagId}, #{userId},	#{writer})
+	</insert>
+
+	<delete id="deleteCustomTag" parameterType="Integer">
+		DELETE
+		FROM 
+			custom_tag
+		WHERE 
+			tag_id=#{tagId}
+	</delete>
+
+	<delete id="deleteSharedCustomTag" parameterType="com.nts.intern.todo.model.tag.CustomTag">
+		DELETE
+		FROM
+			custom_tag
+		WHERE
+			tag_id = #{tagId}
+		AND 
+			user_id = #{userId}
+		AND 
+			writer = #{writer}
+	</delete>
+	
+	<select id="selectCustomTag"  parameterType="com.nts.intern.todo.model.tag.CustomTag" resultType="Integer">
+		SELECT 
+			tag_id
+		FROM 
+			custom_tag
+		WHERE
+			tag_id = #{tagId}
+		AND
+			user_id = #{userId}
+		AND
+			writer = #{writer}
+	</select>
+
+</mapper>
